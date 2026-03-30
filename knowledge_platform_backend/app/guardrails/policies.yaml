@@ -1,0 +1,27 @@
+blocklist:
+  - self-harm
+  - suicide
+  - hack
+  - exploit
+  - bomb
+  - weapon
+  - drugs
+  - abuse
+  - kill
+  - murder
+  - stab
+  - shoot
+  - harm
+
+patterns:
+  # Violence / harm
+  - "(?i)kill\\s+(myself|him|her|them|someone|anyone)"
+  - "(?i)murder\\s+(him|her|someone|anyone)"
+  - "(?i)harm\\s+(myself|him|her|them|someone|anyone)"
+  - "(?i)stab\\s+(him|her|someone|anyone)"
+  - "(?i)shoot\\s+(him|her|someone|anyone)"
+
+  # Sensitive data
+  - "(?i)credit\\s+card\\s+number"
+  - "(?i)ssn\\s+[0-9]{3}-[0-9]{2}-[0-9]{4}"
+  - "(?i)password\\s*[:=]\\s*.+"
