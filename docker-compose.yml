@@ -8,8 +8,7 @@ services:
       - "8000:8000"
     env_file:
       - .env
-    volumes:
-      - ./KNOWLEDGE_PLATFORM_BACKEND:/app
+    restart: unless-stopped
 
   frontend:
     build: ./KNOWLEDGE_PLATFORM_FRONTEND
@@ -18,9 +17,8 @@ services:
       - "3000:3000"
     env_file:
       - .env
-    volumes:
-      - ./KNOWLEDGE_PLATFORM_FRONTEND:/app
-    depends_on:
-      - backend
     environment:
       - NEXT_PUBLIC_API_URL=http://backend:8000
+    depends_on:
+      - backend
+    restart: unless-stopped
