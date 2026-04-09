@@ -10,6 +10,7 @@ router = APIRouter()
 # Configure limiter
 limiter = Limiter(key_func=get_remote_address)
 
+@router.get("")
 @router.get("/")
 @limiter.limit("60/minute")  # allow 60 queries per minute per client IP
 async def query_document(request: Request, q: str):

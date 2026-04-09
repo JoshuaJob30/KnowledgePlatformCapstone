@@ -1,0 +1,36 @@
+# Bytecode and cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+env/
+venv/
+.venv/
+
+# Node / frontend artifacts
+node_modules/
+build/
+dist/
+
+# Git and logs
+.git
+.gitignore
+*.log
+
+# Data and archives
+*.csv
+*.tsv
+*.json
+*.xml
+*.mp4
+*.mp3
+*.zip
+*.tar
+*.gz
+*.rar
+
+# OS files
+.DS_Store
+Thumbs.db
