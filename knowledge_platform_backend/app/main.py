@@ -35,3 +35,7 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded):
         status_code=429,
         content={"detail": "Rate limit exceeded. Please try again later."}
     )
+
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
