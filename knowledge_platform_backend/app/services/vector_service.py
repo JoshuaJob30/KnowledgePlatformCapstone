@@ -82,3 +82,23 @@ def cached_search(query: str, k: int = 5):
     Stores up to 128 unique queries in memory.
     """
     return search_documents(query, k, hybrid=True)
+
+def clear_all_documents():
+    """Clear all documents and reset FAISS index."""
+    global faiss_index, documents
+    dimension = vector_model.get_sentence_embedding_dimension()
+    faiss_index = faiss.IndexFlatL2(dimension)  # reset index
+    documents = []  # clear metadata
+    logger.info("Cleared all documents from vector store.")
+    return True
+
+def has_match(query: str, threshold: float = 0.6) -> bool:
+    """Quick check if query matches any uploaded doc chunk."""
+    init_vector_store()
+    if not documents:
+        return False
+    embedding = vector_model.encode([query])
+    D, I = faiss_index.search(np.array(embedding, dtype="float32"), 1)
+    if I[0][0] < len(documents):
+        return True
+    return False

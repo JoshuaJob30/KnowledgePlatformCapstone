@@ -1,12 +1,13 @@
 # app/services/crew.py
 import logging
+import asyncio
 from langsmith import traceable
 from app.services.agents_core import (
     planner_agent,
     retriever_agent,
     answer_agent,
     critic_agent,
-    memory_agent,
+    memory_agent,   # async memory agent from agents_core
 )
 
 logger = logging.getLogger(__name__)
@@ -19,57 +20,57 @@ class CrewRole:
 
     async def run(self, *args, **kwargs):
         if self.async_mode:
-            result = await self.func(*args, **kwargs)
+            return await self.func(*args, **kwargs)
         else:
-            # synchronous function
-            result = self.func(*args, **kwargs)
-        logger.info(f"[{self.name}] Output: {result}")
-        return result
+            return self.func(*args, **kwargs)
 
 # Define roles
-Planner = CrewRole("Planner", planner_agent, async_mode=True)
-Retriever = CrewRole("Retriever", retriever_agent, async_mode=False)
-Executor = CrewRole("Executor", answer_agent, async_mode=True)
-Critic = CrewRole("Critic", critic_agent, async_mode=True)
-Memory = CrewRole("Memory", memory_agent, async_mode=False)
+Planner   = CrewRole("Planner", planner_agent, async_mode=True)
+Retriever = CrewRole("Retriever", retriever_agent, async_mode=False)  # retriever is sync
+Executor  = CrewRole("Executor", answer_agent, async_mode=True)
+Critic    = CrewRole("Critic", critic_agent, async_mode=True)
+Memory    = CrewRole("Memory", memory_agent, async_mode=True)  # async memory agent
 
 @traceable(name="AutoGenCrewOrchestrator")
-async def orchestrate(question: str, route: str, max_rounds: int = 3) -> str:
-    """
-    AutoGen-style orchestration:
-    Planner, Executor, and Critic exchange messages dynamically until Critic approves
-    or max_rounds is reached.
-    """
+async def orchestrate(question: str, route: str, max_rounds: int = 3) -> dict:
     if route != "rag_doc":
         logger.info(f"[Crew] Non-doc route, handled by MCP: {route}")
-        return None
+        return {"draft": None, "evidence": None, "critique": {}}
 
-    # Step 1: Planner proposes subtasks
     steps = await Planner.run(question, route)
     logger.info(f"[Crew] Planner steps: {steps}")
 
-    # Step 2: Retriever provides evidence
-    evidence = await Retriever.run(question)
+    # Retriever is sync → no await
+    evidence = Retriever.run(question)
 
-    # Step 3: Loop between Executor and Critic
+    # Normalize evidence immediately
+    if evidence is None:
+        evidence = ""
+    elif asyncio.iscoroutine(evidence):
+        evidence = await evidence
+    evidence = str(evidence)
+
     draft = None
+    critique = {}
     for round_num in range(1, max_rounds + 1):
-        logger.info(f"[Crew] Round {round_num} starting.")
-
-        # Executor drafts answer
         draft = await Executor.run(question, evidence)
-
-        # Critic evaluates
         critique = await Critic.run(evidence, draft)
         logger.info(f"[Crew] Critic evaluation: {critique}")
-
         if not critique.get("needs_retry", False):
-            logger.info("[Crew] Critic approved draft.")
             break
-        else:
-            logger.info("[Crew] Critic requested retry, looping again.")
 
-    # Step 4: Memory stores final interaction
+    # Normalize draft
+    if draft is None:
+        draft = ""
+    elif asyncio.iscoroutine(draft):
+        draft = await draft
+    draft = str(draft)
+
+    # Call async memory agent
     await Memory.run(question, draft, evidence)
 
-    return draft
+    return {
+        "draft": draft,
+        "evidence": evidence,
+        "critique": critique
+    }

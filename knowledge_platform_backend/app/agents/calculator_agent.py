@@ -5,13 +5,29 @@ import math
 def run(query: str) -> str:
     """
     Calculator agent: safely evaluate simple arithmetic expressions.
-    Supports +, -, *, /, parentheses, and math functions.
+    Supports +, -, *, /, parentheses, math functions, and natural language math words.
+    Extracts the math part from longer sentences.
     """
-    expr = query.strip()
+    original = query.strip().lower()
 
-    # Only allow digits, operators, parentheses, decimal points, and math functions
+    # Normalize common math words to symbols
+    normalized = original
+    normalized = normalized.replace("times", "*")
+    normalized = normalized.replace("plus", "+")
+    normalized = normalized.replace("minus", "-")
+    normalized = normalized.replace("divided by", "/")
+    normalized = normalized.replace("x", "*")
+
+    # Extract the math expression (digits + operators) from the normalized string
+    match = re.findall(r"[0-9\+\-\*\/\.\(\)\s]+", normalized)
+    if not match:
+        return "Error: No valid math expression found."
+
+    expr = "".join(match).strip()
+
+    # Validate allowed characters
     if not re.fullmatch(r"[0-9\+\-\*\/\.\(\)\s]+", expr):
-        return "Error: Invalid expression."
+        return f"Error: Invalid expression. (extracted: {expr})"
 
     try:
         # Safe eval with math functions available

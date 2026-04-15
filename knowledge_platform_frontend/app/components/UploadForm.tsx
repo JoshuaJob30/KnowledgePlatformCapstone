@@ -20,7 +20,6 @@ export default function UploadForm() {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      // Backend returns { results: [{ filename, chunks_ingested }] }
       const results = res.data.results
         .map(
           (r: any) =>
@@ -41,6 +40,16 @@ export default function UploadForm() {
     }
   };
 
+  const handleClearDocs = async () => {
+    try {
+      const res = await api.post("/ingestion/clear_docs");
+      setStatus(res.data.message);
+      setFiles([]);
+    } catch (err: any) {
+      setStatus(`Error clearing docs: ${err.message}`);
+    }
+  };
+
   return (
     <Paper elevation={3} sx={{ p: 4 }}>
       <Typography variant="h6" gutterBottom>
@@ -53,7 +62,16 @@ export default function UploadForm() {
         style={{ marginBottom: "1rem" }}
       />
       {files.length > 0 && (
-        <Box display="flex" flexDirection="column" mb={2}>
+        <Box
+          sx={{
+            maxHeight: 200,
+            overflowY: "auto",
+            border: "1px solid #ddd",
+            borderRadius: 2,
+            p: 1,
+            mb: 2
+          }}
+        >
           {files.map((file, idx) => (
             <Box
               key={idx}
@@ -66,9 +84,7 @@ export default function UploadForm() {
               <Button
                 color="error"
                 size="small"
-                onClick={() =>
-                  setFiles(files.filter((_, i) => i !== idx))
-                }
+                onClick={() => setFiles(files.filter((_, i) => i !== idx))}
               >
                 Remove
               </Button>
@@ -76,14 +92,23 @@ export default function UploadForm() {
           ))}
         </Box>
       )}
-      <Button
-        variant="contained"
-        color="primary"
-        disabled={files.length === 0 || loading}
-        onClick={handleUpload}
-      >
-        {loading ? "Uploading..." : "Upload"}
-      </Button>
+      <Box mt={2} display="flex" gap={2}>
+        <Button
+          variant="contained"
+          color="primary"
+          disabled={files.length === 0 || loading}
+          onClick={handleUpload}
+        >
+          {loading ? "Uploading..." : "Upload"}
+        </Button>
+        <Button
+          variant="outlined"
+          color="error"
+          onClick={handleClearDocs}
+        >
+          Clear Docs
+        </Button>
+      </Box>
       {status && (
         <Typography variant="body2" sx={{ mt: 2 }}>
           {status}

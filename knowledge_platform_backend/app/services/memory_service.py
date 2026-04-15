@@ -1,3 +1,4 @@
+# app/services/memory_service.py
 import os, json
 from langchain_community.vectorstores import Chroma
 from langchain_huggingface import HuggingFaceEmbeddings
@@ -62,3 +63,28 @@ def ltm_add_facts(facts):
                                 persist_directory=os.path.join(DATA_DIR,"chroma_ltm"))
     _ltm_vs.persist()
     json.dump(_ltm_facts, open(LTM_PATH,"w"))
+
+# Added getters so memory_agent can read
+def get_recent_queries(limit: int = 10):
+    return _stm_texts[-limit:]
+
+def get_durable_facts():
+    return _ltm_facts
+
+def get_episodic_memories(limit: int = 3):
+    return _episodes[-limit:]
+
+# Added clear function
+def clear_memory():
+    """Reset all memory stores and JSON files safely."""
+    global _stm_texts, _episodes, _ltm_facts, _stm_vs, _epi_vs, _ltm_vs
+    _stm_texts = []
+    _episodes = []
+    _ltm_facts = []
+    _stm_vs = None
+    _epi_vs = None
+    _ltm_vs = None
+    # Overwrite JSON files with empty lists
+    json.dump(_stm_texts, open(STM_PATH, "w"))
+    json.dump(_episodes, open(EPI_PATH, "w"))
+    json.dump(_ltm_facts, open(LTM_PATH, "w"))

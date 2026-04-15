@@ -1,16 +1,19 @@
+// app/components/AnswerDisplay.tsx
 "use client";
 import { Paper, Typography } from "@mui/material";
 
 const sourceLabels: Record<string, string> = {
   rag_doc: "Uploaded Documents",
-  calc: "Calculator",
+  calculator: "Calculator",          
   healthcare: "Healthcare Agent",
   finance: "Finance Agent",
   shopping: "Shopping Agent",
   code: "Programming Agent",
   search: "Web Search",
   guardrail: "Safety Guardrail",
-  error: "Error"
+  error: "Error",
+  llm: "AI Model",
+  memory: "Memory Agent"             
 };
 
 export default function AnswerDisplay({ answer, source }: { answer: string; source?: string }) {

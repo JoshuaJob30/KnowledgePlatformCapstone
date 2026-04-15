@@ -21,3 +21,5 @@ langgraph
 PyJWT>=2.8.0
 slowapi
 langsmith
+geopy
+timezonefinder

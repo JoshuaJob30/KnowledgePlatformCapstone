@@ -3,6 +3,7 @@ from fastapi import APIRouter, Request, HTTPException
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 from app.services.agent_service import answer_query
+from app.services import memory_service
 from app.core.logging import logger
 
 router = APIRouter()
@@ -18,3 +19,8 @@ async def query_document(request: Request, q: str):
         raise HTTPException(status_code=400, detail="Query cannot be empty")
     result = await answer_query(q)
     return {"query": q, "answer": result["answer"], "source": result["source"]}
+
+@router.post("/clear_memory")
+async def clear_memory_route():
+    memory_service.clear_memory()
+    return {"status": "memory cleared"}

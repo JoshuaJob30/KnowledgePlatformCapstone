@@ -1,3 +1,7 @@
+import inspect
+from app.services.agents_core import memory_agent
+from app.agents.time_agent import run as time_agent
+from app.agents.date_agent import run as date_agent
 from app.agents.calculator_agent import run as calculator_agent
 from app.agents.code_agent import run as code_agent
 from app.agents.finance_agent import run as finance_agent
@@ -12,6 +16,9 @@ AGENT_REGISTRY = {
     "healthcare": healthcare_agent,
     "search": search_agent,
     "shopping": shopping_agent,
+    "date": date_agent,
+    "time": time_agent,
+    "memory": memory_agent,
 }
 
 async def mcp_call(route: str, question: str):
@@ -19,9 +26,11 @@ async def mcp_call(route: str, question: str):
     if not agent:
         return None
     try:
-        if hasattr(agent, "__await__"):  # async agent
-            return await agent(question)
-        else:  # sync agent
-            return agent(question)
+        if inspect.iscoroutinefunction(agent):
+            result = await agent(question, "", "")  # memory_agent expects 3 args
+        else:
+            result = agent(question)
+
+        return result if isinstance(result, str) else str(result)
     except Exception as e:
         return f"Error running agent {route}: {e}"

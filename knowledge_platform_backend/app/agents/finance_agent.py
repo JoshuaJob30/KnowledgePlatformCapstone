@@ -17,3 +17,4 @@ async def run(query: str) -> str:
     except Exception as e:
         logger.error(f"[FinanceAgent] Error: {e}")
         return "Error: could not process finance query."
+

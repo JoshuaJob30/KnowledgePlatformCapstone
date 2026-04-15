@@ -1,3 +1,4 @@
+// app/components/Footer.tsx
 "use client";
 import { Box, Typography } from "@mui/material";
 

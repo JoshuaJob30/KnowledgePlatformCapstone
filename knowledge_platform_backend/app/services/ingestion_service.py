@@ -93,3 +93,6 @@ def ingest_and_index(filepath: str, filename: str) -> int:
     vector_service.add_document(chunks, filename)
     return len(chunks)
 
+def clear_docs():
+    """Clear all uploaded document embeddings from vector store."""
+    return vector_service.clear_all_documents()

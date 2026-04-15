@@ -90,13 +90,15 @@ async def critic_agent(evidence: str, draft: str) -> dict:
         logger.error(f"[Critic] Error: {e}")
         return {"grounding":1.0,"conciseness":1.0,"needs_retry":False}
 
-# Memory Agent
-def memory_agent(question: str, answer: str, evidence: str):
+@traceable(name="MemoryAgent")
+async def memory_agent(question: str, answer: str, evidence: str) -> str:
     try:
         memory_service.stm_add(f"Q: {question}")
         memory_service.stm_add(f"A: {answer}")
         memory_service.epi_add(f"Interaction: {question} -> {answer}")
         memory_service.ltm_add_facts([f"Fact: {answer}"])
         logger.info("[Memory] Facts and episodes stored successfully.")
+        return "Memory stored successfully."
     except Exception as e:
         logger.error(f"[Memory] Error storing memory: {e}")
+        return f"Error storing memory: {e}"

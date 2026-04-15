@@ -19,3 +19,11 @@ async def upload_documents(files: list[UploadFile] = File(...)):
         })
     return {"results": results}
 
+@router.post("/clear_docs")
+async def clear_docs_route():
+    try:
+        ingestion_service.clear_docs()
+        return {"status": "success", "message": "Uploaded documents cleared."}
+    except Exception as e:
+        logger.error(f"[Docs] Error clearing documents: {e}")
+        raise HTTPException(status_code=500, detail=f"Error clearing docs: {e}")

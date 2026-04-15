@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 from app.api import ingestion_routes, query_routes
-from app.services import vector_service
+from app.services import vector_service, memory_service   # import memory_service
 
 app = FastAPI(title="Knowledge Platform Backend")
 
@@ -23,6 +23,7 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     vector_service.init_vector_store()
+    memory_service.clear_memory()  # wipe memory at server start
 
 # Routers
 app.include_router(ingestion_routes.router, prefix="/ingestion", tags=["Ingestion"])
